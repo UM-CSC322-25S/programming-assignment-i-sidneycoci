@@ -7,6 +7,13 @@
 #define MAX_BOATS 120
 #define MAX_NAME_LENGTH 128 // can hold 127 characters and a null terminator
 
+// defines for all the place type rates
+#define SLIP_RATE 12.50
+#define LAND_RATE 14.00
+#define TRAILOR_RATE 25.00
+#define STORAGE_RATE 11.20
+
+
 // enum to represent the place type
 typedef enum {
     SLIP,
@@ -26,7 +33,7 @@ typedef union {
 // struct for the boats themselves
 typedef struct {
     char name[MAX_NAME_LENGTH];
-    float length; // using float so we can have .5 foot or .25 lengths, won't need all the precision that a double would provide
+    int length; // apparently there are only whole-number length boats, so no need for float
     PlaceType placeType;
     PlaceInfo placeInfo;
     float amountOwed; 
@@ -77,7 +84,7 @@ int loadBoatData(const char *fileName){
         token = strtok(NULL, ",");
 
         // next, pull boat length
-        boat->length = atof(token); //converting the string to float for the length type
+        boat->length = atoi(token); //converting the string to float for the length type
 
         token = strtok(NULL, ",");
 
@@ -143,7 +150,7 @@ void saveBoatData(const char* fileName){
         Boat *boat = boatsList[i];
 
         // printing boat name & length to file
-        fprintf(file, "%s,%f,", boat->name, boat->length);
+        fprintf(file, "%s,%d,", boat->name, boat->length);
 
         //tricky part for boat placetype and placeinfo
         if(boat->placeType == SLIP){
@@ -184,7 +191,7 @@ void printInventory(){
             }
 
             // long print statement to format and print all the info for each boat
-            printf("%-20s %6.2f' %-9s %-15s Owes $%-10.2f\n", 
+            printf("%-20s %4d' %-8s %-7s Owes $%7.2f\n", 
                 boat->name,
                 boat->length,
                 boatsList[i]->placeType == SLIP ? "slip" : 
@@ -224,7 +231,7 @@ void addBoat(const char* boatData){
     token = strtok(NULL, ",");
 
     // next, the length
-    boat->length = atof(token);
+    boat->length = atoi(token);
     token = strtok(NULL, ",");
 
     // next, the place type
@@ -323,16 +330,16 @@ void updateMonthly(){
             Boat *boat = boatsList[i];
             switch (boat->placeType){
                 case SLIP:
-                    boat->amountOwed += boat->length * 12.50;
+                    boat->amountOwed += boat->length * SLIP_RATE;
                     break;
                 case LAND:
-                    boat->amountOwed += boat->length * 14.00;
+                    boat->amountOwed += boat->length * LAND_RATE;
                     break;
                 case TRAILOR:
-                    boat->amountOwed += boat->length * 25.00;
+                    boat->amountOwed += boat->length * TRAILOR_RATE;
                     break;
                 case STORAGE:
-                    boat->amountOwed += boat->length * 11.20;
+                    boat->amountOwed += boat->length * STORAGE_RATE;
                     break;
             }
         }
